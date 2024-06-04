@@ -38,7 +38,8 @@ jobs:
       - name: 'Deploy using Gradle'
         shell: bash
         run: |+
-            ./gradlew clean azureFunctionsPackage azureFunctionsPackageZip
+            ./gradlew clean package azureFunctionsPackage azureFunctionsPackageZip
+
       - name: 'Deploy'
         uses: Azure/functions-action@v1
         id: fa
