@@ -36,7 +36,7 @@ jobs:
             distribution: 'temurin'
             java-version: '17'
 
-      - name: 'Restore Project Dependencies Using Gradle'
+      - name: 'Deploy using Gradle'
         shell: bash
         run: |+
             ./gradlew clean azureFunctionsDeploy
