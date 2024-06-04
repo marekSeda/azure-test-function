@@ -42,7 +42,7 @@ public class Function {
         HttpRequestMessage<Optional<String>> request,
         @BindingName("partitionKey") String partitionKey,
         @BindingName("rowKey") String rowKey,
-        @TableOutput(name = "person", partitionKey = "{partitionKey}", rowKey = "{rowKey}", tableName = "%MyTableName%", connection = "MyStorage") OutputBinding<MenuRecord> person,
+        @TableOutput(name = "HW3MenuData", partitionKey = "{partitionKey}", rowKey = "{rowKey}", tableName = "HW3MenuData", connection = "MyStorage") OutputBinding<MenuRecord> person,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
