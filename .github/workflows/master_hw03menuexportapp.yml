@@ -47,4 +47,3 @@ jobs:
             app-name: 'hw03menuexportapp'
             slot-name: 'Production'
             package: 'build/azure-functions/hw03menuexportapp'
-            respect-pom-xml: true
