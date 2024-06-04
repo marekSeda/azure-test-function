@@ -54,7 +54,7 @@ public class Function {
 
     @FunctionName("ProcessQueueMessage")
     public void processQueueMessage(
-        @ServiceBusQueueTrigger(name = "message",
+        @QueueTrigger(name = "message",
             queueName = "scrape-request-queue",
             connection = "MyStorage") String message,
         @TableOutput(name = "menuRecord", tableName = "HW3MenuData", connection = "MyStorage") OutputBinding<MenuRecord[]> menuRecords,
@@ -90,7 +90,7 @@ public class Function {
             methods = {HttpMethod.GET},
             authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @ServiceBusQueueOutput(name = "message", queueName = "scrape-request-queue", connection = "MyStorage") OutputBinding<String> message,
+        @QueueOutput(name = "message", queueName = "scrape-request-queue", connection = "MyStorage") OutputBinding<String> message,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
