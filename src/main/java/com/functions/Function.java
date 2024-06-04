@@ -39,7 +39,7 @@ public class Function {
         @HttpTrigger(
             name = "req",
             methods = {HttpMethod.GET, HttpMethod.POST},
-            route = "/{partitionKey}",
+            route = "partition/{partitionKey}",
             authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
         @BindingName("partitionKey") String partitionKey,
