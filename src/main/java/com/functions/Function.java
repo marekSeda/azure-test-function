@@ -1,6 +1,7 @@
 package com.functions;
 
-import com.functions.data.MenuRecord;
+import com.functions.data.Record;
+import com.functions.data.RecordQueueDto;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 
@@ -10,77 +11,43 @@ import java.util.Optional;
  * Azure Functions with HTTP Trigger.
  */
 public class Function {
-    public static int count = 1;
-
-    @FunctionName("HttpExample")
-    public HttpResponseMessage run(
-        @HttpTrigger(
-            name = "req",
-            methods = {HttpMethod.GET, HttpMethod.POST},
-            authLevel = AuthorizationLevel.ANONYMOUS)
-        HttpRequestMessage<Optional<String>> request,
-        final ExecutionContext context) {
-        context.getLogger().info("Java HTTP trigger processed a request.");
-
-        // Parse query parameter
-        final String query = request.getQueryParameters().get("name");
-        final String name = request.getBody().orElse(query);
-
-        if (name == null) {
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please pass a name on the query string or in the request body").build();
-        } else {
-            return request.createResponseBuilder(HttpStatus.OK).body("Hello, " + name).build();
-        }
-    }
-
-    @FunctionName("HttpTestAddToTableStorage")
-    public HttpResponseMessage httpTestAddToTableStorage(
-        @HttpTrigger(
-            name = "req",
-            methods = {HttpMethod.GET, HttpMethod.POST},
-            authLevel = AuthorizationLevel.ANONYMOUS)
-        HttpRequestMessage<Optional<String>> request,
-        @TableOutput(name = "menuRecord", tableName = "HW3MenuData", connection = "MyStorage") OutputBinding<MenuRecord[]> menuRecords,
-        final ExecutionContext context
-    ) {
-        context.getLogger().info("Java HTTP trigger processed a request.");
-        MenuRecord menuRecordOut = new MenuRecord();
-        menuRecordOut.setPartitionKey("u3certu");
-        menuRecordOut.setRowKey(String.valueOf(System.currentTimeMillis()));
-        menuRecordOut.setName("Test" + count++);
-        menuRecords.setValue(new MenuRecord[]{menuRecordOut});
-        return request.createResponseBuilder(HttpStatus.OK).body("Added to table storage").build();
-    }
 
     @FunctionName("ProcessQueueMessage")
     public void processQueueMessage(
         @QueueTrigger(name = "message",
             queueName = "scrape-request-queue",
-            connection = "MyStorage") String message,
-        @TableOutput(name = "menuRecord", tableName = "HW3MenuData", connection = "MyStorage") OutputBinding<MenuRecord[]> menuRecords,
+            connection = "MyStorage") RecordQueueDto queueItem,
+        @TableOutput(name = "menuRecord", tableName = "HW3RecordData", connection = "MyStorage") OutputBinding<Record[]> menuRecords,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
-        MenuRecord menuRecordOut = new MenuRecord();
-        menuRecordOut.setPartitionKey("u3certu");
+        Record menuRecordOut = new Record();
+        menuRecordOut.setPartitionKey(queueItem.getPlace());
         menuRecordOut.setRowKey(String.valueOf(System.currentTimeMillis()));
-        menuRecordOut.setName("Test" + count++);
-        menuRecords.setValue(new MenuRecord[]{menuRecordOut});
+        menuRecordOut.setPlace(queueItem.getPlace());
+        menuRecordOut.setTemperature(queueItem.getTemperature());
+        menuRecords.setValue(new Record[]{menuRecordOut});
+
+        if (queueItem.getTemperature() > 30) {
+            context.getLogger().info("Temperature is too high, sending alert.");
+        }
     }
 
 
-    @FunctionName("HttpTestGetTableData")
+    @FunctionName("HttpGetTableData")
     public HttpResponseMessage httpGetTableData(
         @HttpTrigger(
             name = "req",
             methods = {HttpMethod.GET, HttpMethod.POST},
+            route = "/{partitionKey}",
             authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @TableInput(name="menuRecord", partitionKey="u3certu", tableName="HW3MenuData", connection="MyStorage") MenuRecord[] menuRecords,
+        @BindingName("partitionKey") String partitionKey,
+        @TableInput(name = "menuRecord", partitionKey = "{partitionKey}", tableName = "HW3RecordData", connection = "MyStorage") Record[] menuRecords,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
-        return request.createResponseBuilder(HttpStatus.OK).body(menuRecords.length + " menu records").build();
+        return request.createResponseBuilder(HttpStatus.OK).body(menuRecords).build();
     }
 
     @FunctionName("AddRequestToQueue")
@@ -90,11 +57,19 @@ public class Function {
             methods = {HttpMethod.GET},
             authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @QueueOutput(name = "message", queueName = "scrape-request-queue", connection = "MyStorage") OutputBinding<String> message,
+        @QueueOutput(name = "message", queueName = "scrape-request-queue", connection = "MyStorage") OutputBinding<RecordQueueDto> message,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
-        message.setValue("u3certu");
+        String place = request.getQueryParameters().get("place");
+        String temperature = request.getQueryParameters().get("temperature");
+        if (place == null || temperature == null) {
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please pass a place and temperature on the query string").build();
+        }
+        RecordQueueDto messageValue = new RecordQueueDto();
+        messageValue.setPlace(place);
+        messageValue.setTemperature(Long.parseLong(temperature));
+        message.setValue(messageValue);
         return request.createResponseBuilder(HttpStatus.OK).body("Request added to queue").build();
     }
 }

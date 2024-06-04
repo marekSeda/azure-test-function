@@ -1,9 +1,10 @@
 package com.functions.data;
 
-public class MenuRecord {
+public class Record {
     private String partitionKey;
     private String rowKey;
-    private String name;
+    private String place;
+    private Long temperature;
 
     public String getPartitionKey() {
         return this.partitionKey;
@@ -21,12 +22,19 @@ public class MenuRecord {
         this.rowKey = key;
     }
 
-    public String getName() {
-        return this.name;
+    public String getPlace() {
+        return place;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPlace(String place) {
+        this.place = place;
     }
 
+    public Long getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(Long temperature) {
+        this.temperature = temperature;
+    }
 }
