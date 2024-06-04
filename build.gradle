@@ -24,9 +24,9 @@ repositories {
 
 azurefunctions {
     resourceGroup = 'HW3'
-    appName = 'azure-hw3-function'
+    appName = 'hw03menuexportapp'
     pricingTier = 'Consumption'
-    region = 'westus'
+    region = 'Switzerland North'
     runtime {
       os = 'Linux'
       javaVersion = 'Java 17'
