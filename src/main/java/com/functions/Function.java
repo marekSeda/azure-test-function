@@ -1,20 +1,8 @@
-/**
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for
- * license information.
- */
-
 package com.functions;
 
-import com.microsoft.azure.functions.ExecutionContext;
-import com.microsoft.azure.functions.HttpMethod;
-import com.microsoft.azure.functions.HttpRequestMessage;
-import com.microsoft.azure.functions.HttpResponseMessage;
-import com.microsoft.azure.functions.HttpStatus;
-import com.microsoft.azure.functions.annotation.AuthorizationLevel;
-import com.microsoft.azure.functions.annotation.FixedDelayRetry;
-import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.functions.data.MenuRecord;
+import com.microsoft.azure.functions.*;
+import com.microsoft.azure.functions.annotation.*;
 
 import java.util.Optional;
 
@@ -26,12 +14,12 @@ public class Function {
 
     @FunctionName("HttpExample")
     public HttpResponseMessage run(
-            @HttpTrigger(
-                name = "req",
-                methods = {HttpMethod.GET, HttpMethod.POST},
-                authLevel = AuthorizationLevel.ANONYMOUS)
-                HttpRequestMessage<Optional<String>> request,
-            final ExecutionContext context) {
+        @HttpTrigger(
+            name = "req",
+            methods = {HttpMethod.GET, HttpMethod.POST},
+            authLevel = AuthorizationLevel.ANONYMOUS)
+        HttpRequestMessage<Optional<String>> request,
+        final ExecutionContext context) {
         context.getLogger().info("Java HTTP trigger processed a request.");
 
         // Parse query parameter
@@ -45,46 +33,25 @@ public class Function {
         }
     }
 
-    @FunctionName("HttpExampleRetry")
-    @FixedDelayRetry(maxRetryCount = 3, delayInterval = "00:00:05")
-    public HttpResponseMessage HttpExampleRetry(
+    @FunctionName("HttpTestAddToTableStorage")
+    public HttpResponseMessage httpTestAddToTableStorage(
         @HttpTrigger(
             name = "req",
             methods = {HttpMethod.GET, HttpMethod.POST},
             authLevel = AuthorizationLevel.ANONYMOUS)
-            HttpRequestMessage<Optional<String>> request,
-        final ExecutionContext context) throws Exception {
-        context.getLogger().info("Java HTTP trigger processed a request.");
-
-        if(count<3) {
-            count ++;
-            throw new Exception("error");
-        }
-
-        // Parse query parameter
-        final String query = request.getQueryParameters().get("name");
-        final String name = request.getBody().orElse(query);
-
-        if (name == null) {
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please pass a name on the query string or in the request body").build();
-        } else {
-            return request.createResponseBuilder(HttpStatus.OK).body(name).build();
-        }
-    }
-
-    @FunctionName("HttpTriggerJavaVersion")
-    public static HttpResponseMessage HttpTriggerJavaVersion(
-        @HttpTrigger(
-            name = "req",
-            methods = {HttpMethod.GET, HttpMethod.POST},
-            authLevel = AuthorizationLevel.ANONYMOUS)
-            HttpRequestMessage<Optional<String>> request,
+        HttpRequestMessage<Optional<String>> request,
+        @BindingName("partitionKey") String partitionKey,
+        @BindingName("rowKey") String rowKey,
+        @TableOutput(name = "person", partitionKey = "{partitionKey}", rowKey = "{rowKey}", tableName = "%MyTableName%") OutputBinding<MenuRecord> person,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
-        final String javaVersion = getJavaVersion();
-        context.getLogger().info("Function - HttpTriggerJavaVersion" + javaVersion);
-        return request.createResponseBuilder(HttpStatus.OK).body(javaVersion).build();
+        MenuRecord menuRecord = new MenuRecord();
+        menuRecord.setPartitionKey(partitionKey);
+        menuRecord.setRowKey(rowKey);
+        menuRecord.setName("Test" + count++);
+        person.setValue(menuRecord);
+        return request.createResponseBuilder(HttpStatus.OK).body("Added to table storage").build();
     }
 
     public static String getJavaVersion() {

@@ -9,6 +9,7 @@ version '1.0-SNAPSHOT'
 
 dependencies {
     implementation 'com.microsoft.azure.functions:azure-functions-java-library:3.1.0'
+    implementation 'com.azure:azure-data-tables:12.4.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
     testImplementation 'org.mockito:mockito-core:3.3.3'
 }
