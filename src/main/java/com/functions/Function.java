@@ -4,6 +4,7 @@ import com.functions.data.MenuRecord;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 
+import java.awt.*;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class Function {
             methods = {HttpMethod.GET, HttpMethod.POST},
             authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @TableOutput(name = "HW3MenuData", partitionKey = "{partitionKey}", rowKey = "{rowKey}", tableName = "HW3MenuData", connection = "MyStorage") OutputBinding<MenuRecord> menuRecord,
+        @TableOutput(name="person", tableName="%MyTableName%", connection="MyStorage") OutputBinding<MenuRecord[]> menuRecords,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
@@ -49,7 +50,7 @@ public class Function {
         menuRecordOut.setPartitionKey(LocalDate.now().toString());
         menuRecordOut.setRowKey("name");
         menuRecordOut.setName("Test" + count++);
-        menuRecord.setValue(menuRecordOut);
+        menuRecords.setValue(new MenuRecord[]{menuRecordOut});
         return request.createResponseBuilder(HttpStatus.OK).body("Added to table storage").build();
     }
 
