@@ -66,4 +66,19 @@ public class Function {
         context.getLogger().info("Java HTTP trigger processed a request.");
         return request.createResponseBuilder(HttpStatus.OK).body(menuRecords.length + " menu records").build();
     }
+
+    @FunctionName("AddRequestToQueue")
+    public HttpResponseMessage addRequestToQueue(
+        @HttpTrigger(
+            name = "req",
+            methods = {HttpMethod.GET},
+            authLevel = AuthorizationLevel.ANONYMOUS)
+        HttpRequestMessage<Optional<String>> request,
+        @ServiceBusTopicOutput(name = "message", topicName = "scrape-request-queue", subscriptionName = "default-subscription", connection = "MyStorage") OutputBinding<String> message,
+        final ExecutionContext context
+    ) {
+        context.getLogger().info("Java HTTP trigger processed a request.");
+        message.setValue("u3certu");
+        return request.createResponseBuilder(HttpStatus.OK).body("Request added to queue").build();
+    }
 }
