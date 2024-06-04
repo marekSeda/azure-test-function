@@ -24,11 +24,6 @@ import java.util.Optional;
 public class Function {
     public static int count = 1;
 
-    /**
-     * This function listens at endpoint "/api/HttpExample". Two ways to invoke it using "curl" command in bash:
-     * 1. curl -d "HTTP Body" {your host}/api/HttpExample
-     * 2. curl "{your host}/api/HttpExample?name=HTTP%20Query"
-     */
     @FunctionName("HttpExample")
     public HttpResponseMessage run(
             @HttpTrigger(
@@ -50,10 +45,6 @@ public class Function {
         }
     }
 
-    /**
-     * This function listens at endpoint "/api/HttpExampleRetry". The function is re-executed in case of errors until the maximum number of retries occur.
-     * Retry policies: https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-error-pages?tabs=java
-     */
     @FunctionName("HttpExampleRetry")
     @FixedDelayRetry(maxRetryCount = 3, delayInterval = "00:00:05")
     public HttpResponseMessage HttpExampleRetry(
@@ -81,10 +72,6 @@ public class Function {
         }
     }
 
-    /**
-     * This function listens at endpoint "/api/HttpTriggerJavaVersion".
-     * It can be used to verify the Java home and java version currently in use in your Azure function
-     */
     @FunctionName("HttpTriggerJavaVersion")
     public static HttpResponseMessage HttpTriggerJavaVersion(
         @HttpTrigger(
