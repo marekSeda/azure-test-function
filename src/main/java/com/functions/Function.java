@@ -2,10 +2,11 @@ package com.functions;
 
 import com.functions.data.MenuRecord;
 import com.microsoft.azure.functions.*;
-import com.microsoft.azure.functions.annotation.*;
+import com.microsoft.azure.functions.annotation.AuthorizationLevel;
+import com.microsoft.azure.functions.annotation.FunctionName;
+import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.microsoft.azure.functions.annotation.TableOutput;
 
-import java.awt.*;
-import java.time.LocalDate;
 import java.util.Optional;
 
 /**
@@ -42,19 +43,15 @@ public class Function {
             methods = {HttpMethod.GET, HttpMethod.POST},
             authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @TableOutput(name="menuRecord", tableName="HW3MenuData", connection="MyStorage") OutputBinding<MenuRecord[]> menuRecords,
+        @TableOutput(name = "menuRecord", tableName = "HW3MenuData", connection = "MyStorage") OutputBinding<MenuRecord[]> menuRecords,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
         MenuRecord menuRecordOut = new MenuRecord();
-        menuRecordOut.setPartitionKey(LocalDate.now().toString());
-        menuRecordOut.setRowKey("name");
+        menuRecordOut.setPartitionKey("u3certu");
+        menuRecordOut.setRowKey(String.valueOf(System.currentTimeMillis()));
         menuRecordOut.setName("Test" + count++);
         menuRecords.setValue(new MenuRecord[]{menuRecordOut});
         return request.createResponseBuilder(HttpStatus.OK).body("Added to table storage").build();
-    }
-
-    public static String getJavaVersion() {
-        return String.join(" - ", System.getProperty("java.home"), System.getProperty("java.version"));
     }
 }
