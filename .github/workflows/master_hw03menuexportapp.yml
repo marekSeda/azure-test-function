@@ -38,7 +38,7 @@ jobs:
       - name: 'Deploy using Gradle'
         shell: bash
         run: |+
-            ./gradlew clean package azureFunctionsPackage azureFunctionsPackageZip
+            ./gradlew clean azureFunctionsPackage azureFunctionsPackageZip
 
       - name: 'Deploy'
         uses: Azure/functions-action@v1
@@ -46,4 +46,5 @@ jobs:
         with:
             app-name: 'hw03menuexportapp'
             slot-name: 'Production'
-            package: '.'
+            package: 'build/azure-functions/hw03menuexportapp'
+            respect-pom-xml: true
