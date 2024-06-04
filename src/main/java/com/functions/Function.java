@@ -2,10 +2,7 @@ package com.functions;
 
 import com.functions.data.MenuRecord;
 import com.microsoft.azure.functions.*;
-import com.microsoft.azure.functions.annotation.AuthorizationLevel;
-import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.HttpTrigger;
-import com.microsoft.azure.functions.annotation.TableOutput;
+import com.microsoft.azure.functions.annotation.*;
 
 import java.util.Optional;
 
@@ -53,5 +50,20 @@ public class Function {
         menuRecordOut.setName("Test" + count++);
         menuRecords.setValue(new MenuRecord[]{menuRecordOut});
         return request.createResponseBuilder(HttpStatus.OK).body("Added to table storage").build();
+    }
+
+
+    @FunctionName("HttpTestGetTableData")
+    public HttpResponseMessage httpGetTableData(
+        @HttpTrigger(
+            name = "req",
+            methods = {HttpMethod.GET, HttpMethod.POST},
+            authLevel = AuthorizationLevel.ANONYMOUS)
+        HttpRequestMessage<Optional<String>> request,
+        @TableInput(name="menuRecord", partitionKey="u3certu", tableName="HW3MenuData", connection="MyStorage") MenuRecord[] menuRecords,
+        final ExecutionContext context
+    ) {
+        context.getLogger().info("Java HTTP trigger processed a request.");
+        return request.createResponseBuilder(HttpStatus.OK).body(menuRecords.length + " menu records").build();
     }
 }
