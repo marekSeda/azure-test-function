@@ -52,6 +52,22 @@ public class Function {
         return request.createResponseBuilder(HttpStatus.OK).body("Added to table storage").build();
     }
 
+    @FunctionName("ProcessQueueMessage")
+    public void processQueueMessage(
+        @ServiceBusQueueTrigger(name = "message",
+            queueName = "scrape-request-queue",
+            connection = "MyStorage") String message,
+        @TableOutput(name = "menuRecord", tableName = "HW3MenuData", connection = "MyStorage") OutputBinding<MenuRecord[]> menuRecords,
+        final ExecutionContext context
+    ) {
+        context.getLogger().info("Java HTTP trigger processed a request.");
+        MenuRecord menuRecordOut = new MenuRecord();
+        menuRecordOut.setPartitionKey("u3certu");
+        menuRecordOut.setRowKey(String.valueOf(System.currentTimeMillis()));
+        menuRecordOut.setName("Test" + count++);
+        menuRecords.setValue(new MenuRecord[]{menuRecordOut});
+    }
+
 
     @FunctionName("HttpTestGetTableData")
     public HttpResponseMessage httpGetTableData(
@@ -74,7 +90,7 @@ public class Function {
             methods = {HttpMethod.GET},
             authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @ServiceBusTopicOutput(name = "message", topicName = "scrape-request-queue", subscriptionName = "default-subscription", connection = "MyStorage") OutputBinding<String> message,
+        @ServiceBusQueueOutput(name = "message", queueName = "scrape-request-queue", connection = "MyStorage") OutputBinding<String> message,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
