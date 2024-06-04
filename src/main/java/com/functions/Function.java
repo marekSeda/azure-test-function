@@ -42,7 +42,7 @@ public class Function {
             methods = {HttpMethod.GET, HttpMethod.POST},
             authLevel = AuthorizationLevel.ANONYMOUS)
         HttpRequestMessage<Optional<String>> request,
-        @TableOutput(name="person", tableName="%MyTableName%", connection="MyStorage") OutputBinding<MenuRecord[]> menuRecords,
+        @TableOutput(name="menuRecord", tableName="HW3MenuData", connection="MyStorage") OutputBinding<MenuRecord[]> menuRecords,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java HTTP trigger processed a request.");
