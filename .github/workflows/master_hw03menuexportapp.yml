@@ -32,10 +32,11 @@ jobs:
 
       - name: Setup Java Sdk 17
         uses: actions/setup-java@v4
-        with: |+
-            java-version: 17
+        with:
+            java-version: '17'
 
-      - name: 'Restore Project Dependencies Using Mvn'
+
+      - name: 'Restore Project Dependencies Using Gradle'
         shell: bash
         run: |+
             ./gradlew clean azureFunctionsDeploy
